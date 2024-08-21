@@ -1,0 +1,23 @@
+# permissions for end users to view installationaccesstokens.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: a
+    app.kubernetes.io/managed-by: kustomize
+  name: installationaccesstoken-viewer-role
+rules:
+- apiGroups:
+  - tokenaut.appthrust.io
+  resources:
+  - installationaccesstokens
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - tokenaut.appthrust.io
+  resources:
+  - installationaccesstokens/status
+  verbs:
+  - get

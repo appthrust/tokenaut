@@ -1,0 +1,22 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: appthrust-tokenaut
+servers: 1
+agents: 0
+image: docker.io/rancher/k3s:latest
+kubeAPI:
+  host: 0.0.0.0
+  hostIP: 127.0.0.1
+  hostPort: "6443"
+registries:
+  create:
+    name: registry.localhost
+    host: 127.0.0.1
+    hostPort: "15000"
+options:
+  k3d:
+    wait: true
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true

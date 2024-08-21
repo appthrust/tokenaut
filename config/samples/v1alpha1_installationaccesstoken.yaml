@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-app-private-key
+  namespace: default
+type: tokenaut.appthrust.io/private-key
+stringData:
+  privateKey: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEowIBAAKCAQEAux2IyykhqksBG9rFh4OjtIkRK93YAImMSDDnfsE4IASuq3uM
+    JoOxvY1PCrlnE3vJdMlLYWSuY7irMnJiBbE7wt+AeDT4xEEhy0rxhu+NXUqK8K/K
+    cy7y3Ki0TzBTmQ+SS3ob5jAoQSOkZ61AjFEE3Up8/Rss9pIYwqSKBrTG3QkxUXc3
+    2BWz9jfBoXGOc1YoT+/wuDmquFJj1ufOienwONzBQ5beXeepn5wNuegWIUsss0Zp
+    L1zp9uL4hVZHTrcfOpp3gq4Z/diD44uRUQ5O5WOSy8yUPHsjFJXvQQTmXaiIF8wj
+    HObifkayJ2LijJ2m/szIot+nV5ZXY0HuKHixwwIDAQABAoIBAFk3a9HyeqrHuG+f
+    kC9dBOE/uYBA9ozLCKgjKT22wxwBH4eEEP8MK+NFTTq/y/XuP8//aoG1j7DcjEQx
+    ZatxJh10k7y9BSAOLh7QTPkZnz2sHTNFnjHtYL71cYOQd0uzsP1r64GF1Ku6YtlM
+    Mkq1Fqysp4vHOVkXr9aevXEVIPyiZLNpC22bbMQAkE9BP7qL4YvOJCgert4h6dUE
+    3D1w3u6sFdHLFOYcgH4eD0aKArMNNW3z7BTGg0+GyXIfOgV8uWPjsD6noBNEaTvl
+    zH8pPrjbkLMzwseNrJelp7+MN9ObFulbZSViHeiGb/qby9U6ubPeStRHzw6HC7Uo
+    btzekYECgYEA3qflRIMvzhgLYmfrrirjoXnt+smyz6COKjoKW1LTI21D98WBfqne
+    v11qkYBdNzUXAWBpSdoobMLdblVjQtIGtMUUuIriwK11QMsWfBKEpO4DW4lqTLTW
+    +XEcSIMczSeWw/zdn3CG9sxUXJcXPVTgCSIszCEQZTsdZ7+5y1sxvcUCgYEA1yMZ
+    oNPb2dAra0kb1yROHk1LGpU83obqkPyQftzMYEO1EEsV+XNmlVzQgdLUl+ay/E4z
+    B2eqhrj8SmjEYm7e09e5wEJyF/JdyQ6iXjcmdBM2MRvPSg8LKGpORMg6v/JodIDD
+    I5XE9Ook/h/c9fRxViwgEARYFC5hY4uCmP4w8ecCgYBa/+G7I6bJI5ibin+PemX4
+    XB4AbqkPJL6V0YzkEDDM/N5XiLhJLWIlcieY+g6e/qq9XEsL7QaylN3tNybPa4lk
+    Hlw+pDzSpNIUPiydXvApfEGRCtOQMCTgY/M8S6Hc0z5SManefR4cBhzAjtvnrCW4
+    deg7MZRC22tEON7Vlxr4RQKBgGaY0KIIJvKK+gniBarmH3MH/WciALNGuBqIuAgo
+    GDdYUsMAa+xYgnV8m9stxkDivjzgtikz4Pj6wyZhLDadFRsF6AmuJmcRKHS3y+sO
+    dgIpH1DwKDzzS6jseYMH0iyz1+ind2hDBnieKSIf4+pPtrUXufqpd6+4Jq2oXJHF
+    t2XFAoGBAK+snfSXVmsx6kbAtPJvEw6K6smccIYCzcLEduGHTWjqsrPl6gvHQ2YE
+    gtrBrE1fNh6QTD/+lAhp4ygfHbykBGqTmuWYWr6MRlnTnWadHV6rwReCERdJtygg
+    AZJ8k0egSszC2U+CGcR1chiWWCxvF14OgmsdnxNJZHJ1owCsABQi
+    -----END RSA PRIVATE KEY-----
+---
+apiVersion: tokenaut.appthrust.io/v1alpha1
+kind: InstallationAccessToken
+metadata:
+  name: sample-01-simple
+spec:
+  appId: "975222"
+  installationId: "53995250"
+---
+apiVersion: tokenaut.appthrust.io/v1alpha1
+kind: InstallationAccessToken
+metadata:
+  name: sample-02-custom-secret
+spec:
+  appId: "975222"
+  installationId: "53995250"
+  template:
+    stringData:
+      password: "{{ .Token }}"

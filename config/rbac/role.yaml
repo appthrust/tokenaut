@@ -1,0 +1,32 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - tokenaut.appthrust.io
+  resources:
+  - installationaccesstokens
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - tokenaut.appthrust.io
+  resources:
+  - installationaccesstokens/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - tokenaut.appthrust.io
+  resources:
+  - installationaccesstokens/status
+  verbs:
+  - get
+  - patch
+  - update
