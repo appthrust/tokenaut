@@ -8,6 +8,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"html/template"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"strings"
 	"time"
 
@@ -27,6 +28,11 @@ import (
 	tokenautv1alpha1 "github.com/appthrust/tokenaut/api/v1alpha1"
 	"github.com/appthrust/tokenaut/pkg/githubapi"
 	"github.com/appthrust/tokenaut/pkg/githubappjwt"
+)
+
+const (
+	// FinalizerName is the name of the finalizer used to clean up secrets
+	FinalizerName = "tokenaut.appthrust.io/cleanup-secret"
 )
 
 // InstallationAccessTokenReconciler reconciles a InstallationAccessToken object
@@ -52,6 +58,19 @@ func (r *InstallationAccessTokenReconciler) Reconcile(ctx context.Context, req c
 		return ctrl.Result{}, err
 	}
 	log.Info("Reconciling InstallationAccessToken", "Generation", installationAccessToken.Generation)
+
+	// Add finalizer if it doesn't exist
+	if !controllerutil.ContainsFinalizer(&installationAccessToken, FinalizerName) {
+		controllerutil.AddFinalizer(&installationAccessToken, FinalizerName)
+		if err := r.Update(ctx, &installationAccessToken); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	// Check if the InstallationAccessToken is being deleted
+	if !installationAccessToken.ObjectMeta.DeletionTimestamp.IsZero() {
+		return r.reconcileDelete(ctx, &installationAccessToken)
+	}
 
 	// Get the private key
 	privateKey, err := r.getPrivateKey(ctx, &installationAccessToken)
@@ -296,6 +315,36 @@ func (r *InstallationAccessTokenReconciler) updateOverallStatus(ctx context.Cont
 	if err := r.Status().Update(ctx, iat); err != nil {
 		log.FromContext(ctx).Error(err, "Failed to update InstallationAccessToken status")
 	}
+}
+
+func (r *InstallationAccessTokenReconciler) reconcileDelete(ctx context.Context, iat *tokenautv1alpha1.InstallationAccessToken) (ctrl.Result, error) {
+	log := log.FromContext(ctx)
+	log.Info("Starting deletion process for InstallationAccessToken",
+		"name", iat.Name,
+		"namespace", iat.Namespace)
+	if iat.Status.SecretRef.Name != "" && iat.Status.SecretRef.Namespace != "" {
+		secretToDelete := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      iat.Status.SecretRef.Name,
+				Namespace: iat.Status.SecretRef.Namespace,
+			},
+		}
+		if err := r.Delete(ctx, secretToDelete); err != nil && !apierrors.IsNotFound(err) {
+			log.Error(err, "Failed to delete associated Secret",
+				"secretName", secretToDelete.Name,
+				"secretNamespace", secretToDelete.Namespace)
+			return ctrl.Result{RequeueAfter: time.Second * 10}, err
+		}
+	}
+	controllerutil.RemoveFinalizer(iat, FinalizerName)
+	if err := r.Update(ctx, iat); err != nil {
+		log.Error(err, "Failed to remove finalizer from InstallationAccessToken")
+		return ctrl.Result{}, err
+	}
+	log.Info("Successfully completed deletion process for InstallationAccessToken",
+		"name", iat.Name,
+		"namespace", iat.Namespace)
+	return ctrl.Result{}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

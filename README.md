@@ -369,6 +369,21 @@ status:
 | False | InvalidConfiguration | Invalid configuration: {details} | Resource configuration is invalid. Includes details |
 | Unknown | Pending | Resource reconciliation in progress | Resource reconciliation is in progress |
 
+## Secret Deletion
+
+When an InstallationAccessToken is deleted, the associated Secret is automatically deleted as well. This ensures that no orphaned Secrets are left in the cluster after an InstallationAccessToken is removed.
+
+The deletion process follows these steps:
+
+1. When an InstallationAccessToken is marked for deletion, the controller initiates the cleanup process.
+2. The controller attempts to delete the associated Secret, as specified in the InstallationAccessToken's status.
+3. If the Secret deletion is successful or the Secret is not found (possibly already deleted), the controller proceeds with removing the InstallationAccessToken.
+4. If there's an error during the Secret deletion (other than "not found"), the controller will retry the operation.
+
+This automatic cleanup ensures that your cluster remains tidy and that sensitive information (the access token) is properly removed when it's no longer needed.
+
+Note: Ensure that the controller has the necessary permissions to delete Secrets in the relevant namespaces. If you're using InstallationAccessTokens across different namespaces, you may need to adjust your RBAC settings accordingly.
+
 ## Best Practices
 
 ### Annotating the GitHub App Private Key Secret
