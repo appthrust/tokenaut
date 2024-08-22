@@ -1,17 +1,21 @@
 controllerManager:
   manager:
     args:
-    - --metrics-bind-address=:8443
-    - --leader-elect
-    - --health-probe-bind-address=:8081
-    containerSecurityContext:
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-        - ALL
+      enable-http2: false
+      health-probe-bind-address: ":8081"
+      leader-elect: true
+      metrics-bind-address: "0"
+      metrics-secure: true
+      token-refresh-interval: "50m"
+      zap-devel: true
+      zap-encoder: "console"
+      zap-log-level: "info"
+      zap-stacktrace-level: "error"
+      zap-time-encoding: "epoch"
+    extraArgs: []
     image:
-      repository: controller
-      tag: latest
+      repository: quay.io/appthrust/tokenaut
+      tag: "v0.1.0"
     resources:
       limits:
         cpu: 500m
@@ -19,14 +23,19 @@ controllerManager:
       requests:
         cpu: 10m
         memory: 64Mi
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
   replicas: 1
   serviceAccount:
     annotations: {}
 kubernetesClusterDomain: cluster.local
 metricsService:
   ports:
-  - name: https
-    port: 8443
-    protocol: TCP
-    targetPort: 8443
+    - name: https
+      port: 8443
+      protocol: TCP
+      targetPort: 8443
   type: ClusterIP

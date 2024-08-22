@@ -29,7 +29,9 @@
           helmfile
           just
           jwt-cli
+          k3d
           kubebuilder
+          kubernetes-helm
         ];
       in
       {

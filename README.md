@@ -72,6 +72,74 @@ By default, the created Secret follows these simple rules:
 
 > NOTE: This behavior can be modified using the "Custom Secret" method described below.
 
+## Installation
+
+tokenaut is a Kubernetes controller for managing GitHub App Installation Access Tokens. To install the tokenaut Helm chart, use the following command:
+
+```bash
+helm install my-tokenaut oci://quay.io/appthrust/tokenaut-helm/tokenaut --version 0.1.0
+```
+
+## Configuration
+
+The following table lists the configurable parameters of the tokenaut chart and their default values.
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `controllerManager.replicas` | Number of tokenaut controller replicas | `1` |
+| `controllerManager.manager.image.repository` | Image repository | `quay.io/appthrust/tokenaut` |
+| `controllerManager.manager.image.tag` | Image tag | `v0.1.0` |
+| `controllerManager.manager.args.enable-http2` | Enable HTTP/2 for the metrics and webhook servers | `false` |
+| `controllerManager.manager.args.health-probe-bind-address` | The address the probe endpoint binds to | `":8081"` |
+| `controllerManager.manager.args.leader-elect` | Enable leader election for controller manager | `true` |
+| `controllerManager.manager.args.metrics-bind-address` | The address the metrics endpoint binds to | `"0"` |
+| `controllerManager.manager.args.metrics-secure` | Serve metrics endpoint securely via HTTPS | `true` |
+| `controllerManager.manager.args.token-refresh-interval` | The interval at which to refresh the GitHub token | `"50m"` |
+| `controllerManager.manager.args.zap-devel` | Enable Zap development mode | `true` |
+| `controllerManager.manager.args.zap-encoder` | Zap log encoding | `"console"` |
+| `controllerManager.manager.args.zap-log-level` | Zap log level | `"info"` |
+| `controllerManager.manager.args.zap-stacktrace-level` | Zap stacktrace capture level | `"error"` |
+| `controllerManager.manager.args.zap-time-encoding` | Zap time encoding | `"epoch"` |
+| `controllerManager.manager.extraArgs` | Additional arguments to pass to the manager | `[]` |
+| `controllerManager.manager.resources.limits.cpu` | CPU resource limit | `"500m"` |
+| `controllerManager.manager.resources.limits.memory` | Memory resource limit | `"128Mi"` |
+| `controllerManager.manager.resources.requests.cpu` | CPU resource request | `"10m"` |
+| `controllerManager.manager.resources.requests.memory` | Memory resource request | `"64Mi"` |
+| `controllerManager.manager.containerSecurityContext.allowPrivilegeEscalation` | Allow privilege escalation for the container | `false` |
+| `controllerManager.manager.containerSecurityContext.capabilities.drop` | Linux capabilities to drop | `["ALL"]` |
+
+### Customizing the Installation
+
+To customize the installation, you can create a `values.yaml` file with your desired configurations:
+
+```yaml
+controllerManager:
+  replicas: 2
+  manager:
+    args:
+      token-refresh-interval: "30m"
+    resources:
+      limits:
+        cpu: "1"
+        memory: "256Mi"
+```
+
+Then, use this file during installation:
+
+```bash
+helm install my-tokenaut oci://quay.io/appthrust/tokenaut-helm/tokenaut --version 0.1.0 -f values.yaml
+```
+
+Alternatively, you can override values directly in the command line:
+
+```bash
+helm install my-tokenaut oci://quay.io/appthrust/tokenaut-helm/tokenaut --version 0.1.0 --set controllerManager.replicas=2
+```
+
+## Post-Installation
+
+After installation, you'll need to create a Secret containing your GitHub App's private key and a CustomResource (CR) for the InstallationAccessToken. Refer to the Usage section for more details on how to set these up.
+
 ## Explicit Private Key
 
 By default, the controller looks for a Secret named "github-app-private-key" in the "default" namespace and tries to recognize its "privateKey" field as the private key.

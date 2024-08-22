@@ -20,32 +20,46 @@ spec:
         kubectl.kubernetes.io/default-container: manager
     spec:
       containers:
-      - args: {{- toYaml .Values.controllerManager.manager.args | nindent 8 }}
-        command:
-        - /manager
-        env:
-        - name: KUBERNETES_CLUSTER_DOMAIN
-          value: {{ quote .Values.kubernetesClusterDomain }}
-        image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag
-          | default .Chart.AppVersion }}
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8081
-          initialDelaySeconds: 15
-          periodSeconds: 20
-        name: manager
-        readinessProbe:
-          httpGet:
-            path: /readyz
-            port: 8081
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        resources: {{- toYaml .Values.controllerManager.manager.resources | nindent 10
-          }}
-        securityContext: {{- toYaml .Values.controllerManager.manager.containerSecurityContext
-          | nindent 10 }}
-      securityContext:
-        runAsNonRoot: true
+        - command:
+            - /manager
+          args:
+        {{- if (index .Values.controllerManager.manager.args "enable-http2") }}
+            - --enable-http2
+        {{- end }}
+            - --health-probe-bind-address={{ index .Values.controllerManager.manager.args "health-probe-bind-address" }}
+        {{- if (index .Values.controllerManager.manager.args "leader-elect") }}
+            - --leader-elect
+        {{- end }}
+            - --metrics-bind-address={{ index .Values.controllerManager.manager.args "metrics-bind-address" }}
+            - --metrics-secure={{ index .Values.controllerManager.manager.args "metrics-secure" }}
+            - --token-refresh-interval={{ index .Values.controllerManager.manager.args "token-refresh-interval" }}
+        {{- if (index .Values.controllerManager.manager.args "zap-devel") }}
+            - --zap-devel
+        {{- end }}
+            - --zap-encoder={{ index .Values.controllerManager.manager.args "zap-encoder" }}
+            - --zap-log-level={{ index .Values.controllerManager.manager.args "zap-log-level" }}
+            - --zap-stacktrace-level={{ index .Values.controllerManager.manager.args "zap-stacktrace-level" }}
+            - --zap-time-encoding={{ index .Values.controllerManager.manager.args "zap-time-encoding" }}
+        {{- range .Values.controllerManager.manager.extraArgs }}
+            - {{ . }}
+        {{- end }}
+          image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag | default .Chart.AppVersion }}
+          name: manager
+          securityContext:
+          {{- toYaml .Values.controllerManager.manager.containerSecurityContext | nindent 12 }}
+          resources:
+          {{- toYaml .Values.controllerManager.manager.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 10
       serviceAccountName: {{ include "chart.fullname" . }}-controller-manager
       terminationGracePeriodSeconds: 10
