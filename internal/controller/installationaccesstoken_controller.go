@@ -200,6 +200,22 @@ func (r *InstallationAccessTokenReconciler) createOrUpdateSecret(ctx context.Con
 		}
 	}
 
+	// Add metadata to the secret
+	if secret.Labels == nil {
+		secret.Labels = make(map[string]string)
+	}
+	secret.Labels["app.kubernetes.io/managed-by"] = "tokenaut"
+	secret.Labels["tokenaut.appthrust.io/installation-access-token"] = fmt.Sprintf("%s.%s", iat.Namespace, iat.Name)
+
+	if secret.Annotations == nil {
+		secret.Annotations = make(map[string]string)
+	}
+	secret.Annotations["tokenaut.appthrust.io/last-updated"] = time.Now().Format(time.RFC3339)
+	secret.Annotations["tokenaut.appthrust.io/app-id"] = iat.Spec.AppID
+	secret.Annotations["tokenaut.appthrust.io/installation-id"] = iat.Spec.InstallationID
+	secret.Annotations["tokenaut.appthrust.io/source-namespace"] = iat.Namespace
+	secret.Annotations["tokenaut.appthrust.io/source-name"] = iat.Name
+
 	// Create or update the secret
 	err := r.Create(ctx, secret)
 	if err != nil {

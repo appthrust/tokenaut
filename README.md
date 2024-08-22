@@ -384,6 +384,58 @@ This automatic cleanup ensures that your cluster remains tidy and that sensitive
 
 Note: Ensure that the controller has the necessary permissions to delete Secrets in the relevant namespaces. If you're using InstallationAccessTokens across different namespaces, you may need to adjust your RBAC settings accordingly.
 
+## Secret Metadata
+
+To improve the manageability and traceability of Secrets created by tokenaut, we've implemented additional metadata for these Secrets. This metadata helps operators easily identify which Secrets are managed by tokenaut and track their relationship to InstallationAccessTokens.
+
+### Labels
+
+Each Secret created by tokenaut includes the following labels:
+
+- `app.kubernetes.io/managed-by: tokenaut`: Indicates that this Secret is managed by tokenaut.
+- `tokenaut.appthrust.io/installation-access-token: <namespace>.<name>`: Identifies the specific InstallationAccessToken resource that this Secret is associated with, including its namespace to ensure uniqueness across the cluster.
+
+### Annotations
+
+The following annotations are added to each Secret:
+
+- `tokenaut.appthrust.io/last-updated`: Timestamp of when the Secret was last updated.
+- `tokenaut.appthrust.io/app-id`: The GitHub App ID associated with this Secret.
+- `tokenaut.appthrust.io/installation-id`: The GitHub App Installation ID associated with this Secret.
+- `tokenaut.appthrust.io/source-namespace`: The namespace of the source InstallationAccessToken.
+- `tokenaut.appthrust.io/source-name`: The name of the source InstallationAccessToken.
+
+### Use Cases
+
+These metadata additions enable several useful operations:
+
+1. List all Secrets managed by tokenaut:
+	 ```
+	 kubectl get secrets -l app.kubernetes.io/managed-by=tokenaut
+	 ```
+
+2. Find the Secret associated with a specific InstallationAccessToken:
+	 ```
+	 kubectl get secrets -l tokenaut.appthrust.io/installation-access-token=<namespace>.<name>
+	 ```
+
+3. View detailed information about a Secret, including its associated GitHub App and InstallationAccessToken:
+	 ```
+	 kubectl describe secret <secret-name>
+	 ```
+
+4. Find all Secrets associated with a specific GitHub App:
+	 ```
+	 kubectl get secrets -o json | jq '.items[] | select(.metadata.annotations."tokenaut.appthrust.io/app-id"=="<app-id>")'
+	 ```
+
+5. Find all Secrets from a specific namespace's InstallationAccessTokens:
+	 ```
+	 kubectl get secrets -o json | jq '.items[] | select(.metadata.annotations."tokenaut.appthrust.io/source-namespace"=="<namespace>")'
+	 ```
+
+These metadata additions make it easier for operators to manage and track the Secrets created by tokenaut, enhancing the overall observability and maintainability of the system.
+
 ## Best Practices
 
 ### Annotating the GitHub App Private Key Secret
