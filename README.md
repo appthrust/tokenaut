@@ -369,6 +369,45 @@ status:
 | False | InvalidConfiguration | Invalid configuration: {details} | Resource configuration is invalid. Includes details |
 | Unknown | Pending | Resource reconciliation in progress | Resource reconciliation is in progress |
 
+## Best Practices
+
+### Annotating the GitHub App Private Key Secret
+
+When creating the `github-app-private-key` Secret, it's beneficial to include additional metadata as annotations. While the `privateKey` field is the only required data, adding extra information can greatly improve key management and traceability. Consider including the following annotations:
+
+- `sha256`: The SHA256 fingerprint of the private key
+- `created-at`: The creation date of the private key
+- `github-app-url`: The URL of the GitHub App
+
+Here's an example of how to create the Secret with these annotations:
+
+```diff
+ apiVersion: v1
+ kind: Secret
+ metadata:
+   name: github-app-private-key
+   namespace: default
++  annotations:
++    example.com/sha256: 6Bh3506/pnTDWJ/YxCU22p5RZgx7NDvoPfy7UMEXsJ8=
++    example.com/created-at: 2024-04-01T12:00:00Z
++    example.com/github-app-url: https://github.com/organizations/your-org/settings/apps/your-app-slug
+ type: tokenaut.appthrust.io/private-key
+ stringData:
+   privateKey: |
+     -----BEGIN RSA PRIVATE KEY-----
+     ...
+     -----END RSA PRIVATE KEY-----
+```
+
+Benefits of this approach:
+
+1. **Easy Identification**: The SHA256 fingerprint is displayed in the GitHub UI, making it easy to match the Secret with the correct key in your GitHub App settings.
+2. **Auditing**: The creation date helps track when the key was generated, useful for key rotation policies and auditing.
+3. **Simplified Maintenance**: These annotations make it easier to manage multiple keys or troubleshoot issues related to key expiration or mismatch.
+4. **Clear Association**: The GitHub App URL provides a direct link to the associated app, eliminating any ambiguity about which app the key belongs to.
+
+By following this practice, you can significantly improve the manageability and traceability of your GitHub App private keys within your Kubernetes cluster. The added GitHub App URL annotation ensures that you can quickly navigate to the correct app settings, which is particularly helpful when managing multiple GitHub Apps or in large organizations.
+
 ## Troubleshooting
 
 ### Error: "Failed to create token: unexpected status code: 401: A JSON web token could not be decoded"
