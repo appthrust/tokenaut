@@ -619,3 +619,49 @@ Remember to always keep your private key secure and never expose it in your code
 
 6. Verify on Quay.io web interface
 	 Log in to the Quay.io website and check the `appthrust/tokenaut` repository. Confirm that the newly pushed tags (specified version and latest) are displayed.
+
+### Helm Chart Release Process
+
+This guide outlines the steps to release the tokenaut Helm chart to quay.io.
+
+**Important Note:**
+Ideally, the Helm Chart release process should be automated. However, as of now, the automation is not yet in place. Therefore, developers need to follow this manual process on their local environment. In the future, we aim to integrate this process into our CI/CD pipeline for automation.
+
+#### Prerequisites
+
+- Access to the appthrust organization on quay.io
+
+#### Release Steps
+
+1. **Update Version**
+	 Open the `chart/Chart.yaml` file and update the `version` field:
+	 ```yaml
+	 version: X.Y.Z  # Update to the new version number
+	 ```
+	 Also update the `appVersion` if necessary.
+
+2. **Package the Chart**
+	 ```bash
+	 helm package ./chart
+	 ```
+	 This will generate a `tokenaut-X.Y.Z.tgz` file.
+
+3. **Login to quay.io**
+	 ```bash
+	 helm registry login quay.io
+	 ```
+	 Enter your quay.io credentials when prompted.
+
+4. **Push the Chart**
+	 ```bash
+	 helm push tokenaut-X.Y.Z.tgz oci://quay.io/appthrust/tokenaut-helm
+	 ```
+
+5. **Verify the Push**
+	 Check the tokenaut-helm repository in the appthrust organization on quay.io to ensure the new version was pushed correctly.
+
+6. **Test Installation**
+	 Install the newly released chart in a test environment to verify it functions correctly:
+	 ```bash
+	 helm install test-tokenaut oci://quay.io/appthrust/tokenaut-helm/tokenaut --version X.Y.Z
+	 ```
