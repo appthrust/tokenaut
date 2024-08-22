@@ -54,3 +54,22 @@ spec:
       type: git
       url: https://github.com/suinplayground/some-argocd-app.git
       password: '{{ .Token }}'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: configmap-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/suinplayground/some-argocd-app.git
+    targetRevision: HEAD
+    path: .
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
