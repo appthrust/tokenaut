@@ -296,11 +296,9 @@ stringData:
 
 > NOTE: This design guarantees duplicate elimination at the cluster level. It does not consider eliminating duplicates across multiple clusters or between a cluster and non-Kubernetes systems. This design may be revisited from scratch.
 
-## Token Update Frequency
+## Token Refresh Frequency
 
-> NOTE: This feature is a future idea that may be implemented.
-
-GitHub App installation access tokens have a lifespan of 1 hour. The controller updates all tokens at a frequency of less than 1 hour. In the future, this frequency may be changeable through the controller's startup options (`args`).
+GitHub App installation access tokens have a lifespan of 1 hour. The controller refreshes all tokens at a frequency of 50 minutes. This is to ensure that the token is always valid and to avoid the token becoming invalid during the update process. If you need to change the update frequency, you can specify `-token-refresh-interval` in the controller's command line arguments.
 
 ## Manual Trigger for Token Update
 

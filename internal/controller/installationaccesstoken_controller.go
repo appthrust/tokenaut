@@ -32,7 +32,8 @@ import (
 // InstallationAccessTokenReconciler reconciles a InstallationAccessToken object
 type InstallationAccessTokenReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme               *runtime.Scheme
+	TokenRefreshInterval time.Duration
 }
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
@@ -94,7 +95,8 @@ func (r *InstallationAccessTokenReconciler) Reconcile(ctx context.Context, req c
 	r.updateOverallStatus(ctx, &installationAccessToken)
 
 	// Requeue after 50 minutes to refresh the token before it expires
-	return ctrl.Result{RequeueAfter: 50 * time.Minute}, nil
+	log.Info(fmt.Sprintf("Completed reconciliation for %s, requeuing after %v", req.NamespacedName, r.TokenRefreshInterval))
+	return ctrl.Result{RequeueAfter: r.TokenRefreshInterval}, nil
 }
 
 func (r *InstallationAccessTokenReconciler) getPrivateKey(ctx context.Context, iat *tokenautv1alpha1.InstallationAccessToken) (*rsa.PrivateKey, error) {
