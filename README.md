@@ -558,3 +558,64 @@ To resolve this issue:
 3. If the problem persists, try regenerating a new private key for your GitHub App and update the Secret accordingly.
 
 Remember to always keep your private key secure and never expose it in your code or version control systems.
+
+## Development Guide
+
+### Publishing the tokenaut Image to Quay.io
+
+#### Prerequisites
+- Docker is installed
+- Docker Buildx is enabled
+- You have a Quay.io account
+
+#### Important Notes
+- The `tokenaut` repository on Quay.io is public.
+- Currently, the build and push process is not automated. Follow these steps to build and push locally.
+
+#### Steps
+
+1. Log in to Quay.io
+	 ```
+	 docker login quay.io
+	 ```
+	 Enter your Quay.io username and password when prompted.
+
+2. Build multi-architecture image
+	 ```
+	 make docker-buildx IMG=quay.io/appthrust/tokenaut:<version>
+	 ```
+	 Example: `make docker-buildx IMG=quay.io/appthrust/tokenaut:v0.1.0`
+
+	 This command builds images for both ARM64 and AMD64 architectures.
+
+3. Verify the image
+	 ```
+	 docker buildx imagetools inspect quay.io/appthrust/tokenaut:<version>
+	 ```
+	 Example: `docker buildx imagetools inspect quay.io/appthrust/tokenaut:v0.1.0`
+
+	 This command checks the manifest and supported architectures of the built image.
+
+4. Push the image
+	 ```
+	 make docker-push IMG=quay.io/appthrust/tokenaut:<version>
+	 ```
+	 Example: `make docker-push IMG=quay.io/appthrust/tokenaut:v0.1.0`
+
+	 This command pushes the multi-architecture image to Quay.io.
+
+5. Update the latest tag
+	 ```
+	 docker tag quay.io/appthrust/tokenaut:<version> quay.io/appthrust/tokenaut:latest
+	 docker push quay.io/appthrust/tokenaut:latest
+	 ```
+	 Example:
+	 ```
+	 docker tag quay.io/appthrust/tokenaut:v0.1.0 quay.io/appthrust/tokenaut:latest
+	 docker push quay.io/appthrust/tokenaut:latest
+	 ```
+
+	 This updates the `latest` tag to point to the new version.
+
+6. Verify on Quay.io web interface
+	 Log in to the Quay.io website and check the `appthrust/tokenaut` repository. Confirm that the newly pushed tags (specified version and latest) are displayed.
