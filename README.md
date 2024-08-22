@@ -1,5 +1,7 @@
 # tokenaut: GitHub App Installation Access Token Controller
 
+[![Docker Repository on Quay](https://quay.io/repository/appthrust/tokenaut/status "Docker Repository on Quay")](https://quay.io/repository/appthrust/tokenaut)
+
 tokenaut is a controller for managing GitHub App Installation Access Tokens (server-to-server tokens, ghs).
 
 ## Problem Solved
