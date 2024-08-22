@@ -369,3 +369,16 @@ status:
 | False | InvalidConfiguration | Invalid configuration: {details} | Resource configuration is invalid. Includes details |
 | Unknown | Pending | Resource reconciliation in progress | Resource reconciliation is in progress |
 
+## Troubleshooting
+
+### Error: "Failed to create token: unexpected status code: 401: A JSON web token could not be decoded"
+
+If you encounter this error, it typically means that the GitHub App's private key is incorrect, and GitHub is rejecting the attempt to issue a token with an invalid JWT.
+
+To resolve this issue:
+
+1. Verify that the GitHub App's private key is correctly stored in the Secret resource.
+2. Double-check that you've copied the entire private key, including the `-----BEGIN RSA PRIVATE KEY-----` and `-----END RSA PRIVATE KEY-----` lines.
+3. If the problem persists, try regenerating a new private key for your GitHub App and update the Secret accordingly.
+
+Remember to always keep your private key secure and never expose it in your code or version control systems.
